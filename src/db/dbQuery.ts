@@ -1,0 +1,274 @@
+import mysql from 'mysql2/promise';
+import { config } from './config';
+import { awaitable } from '@/lib/asyncHelper';
+import getLogger from '@/root/logger';
+
+let connection : mysql.Connection | null = null;
+
+async function getConnection() {
+    if (connection) return connection;
+
+    connection = await mysql.createConnection({
+        host: config.host,
+        user: config.user,
+        password: config.password,
+        database: config.database,
+    })
+
+    return connection;
+}
+
+export async function addActivity(activity: string) {
+    const query = `INSERT INTO Activity (activity) VALUES (?)`;
+    const params = [activity];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add activity: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addPassport(passport_num: string, issue_date: string, expire: string, place_of_issue: string) {
+    const query = `INSERT INTO Passport (passport_number, issue_date, expire, place_of_issue) VALUES (?, ?, ?, ?)`;
+    const params = [passport_num, issue_date, expire, place_of_issue];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add passport: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addPersonType(person_type: string) {
+    const query = `INSERT INTO PersonType (type) VALUES (?)`;
+    const params = [person_type];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add person type: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addVisaType(type: string, desc: string, fee: number, validity: number) {
+    const query = `INSERT INTO VisaType (type, description, fee, max_validity_period) VALUES (?, ?, ?, ?)`;
+    const params = [type, desc, fee, validity];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add visa type: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function setPersonEligibility(person_id: number, visa_id: number) {
+    const query = `INSERT INTO EligiblePerson (person, visa_type) VALUES (?, ?)`;
+    const params = [person_id, visa_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set person eligibility: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function setActivityEligibility(visa_id: number, activity_id: number, eligibility: boolean) {
+    const query = `INSERT INTO ActivityEligibility (visa_type, activity, eligibility) VALUES (?, ?, ?)`;
+    const params = [visa_id, activity_id, eligibility];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set activity eligibility: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addController(first_name: string, last_name: string, email: string) {
+    const query = `INSERT INTO Controller (first_name, last_name, email) VALUES (?, ?, ?)`;
+    const params = [first_name, last_name, email];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add controller: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addCandidate(email: string, gender: string, birthday: string, first_name: string, last_name: string, nationality: string, passport: number, prev_passport?: number) {
+    const query = `INSERT INTO Candidate (email, gender, birthday, first_name, last_name, nationality, passport${prev_passport? ', prev_passport' : ''}) VALUES (?, ?, ?, ?, ?, ?, ?${prev_passport? ', ?' : ''})`;
+    const params = [email, gender, birthday, first_name, last_name, nationality, passport, prev_passport];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add candidate: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addTravelHistory(candidate_id: number, country: string, start_date: string, end_date: string) {
+    const query = `INSERT INTO Visits (candidate, country, start_date, end_date) VALUES (?, ?, ?, ?)`;
+    const params = [candidate_id, country, start_date, end_date];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add travel history: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function addVisaApplication(visa_type: number, candidate: number, reason: string, bio_page?: string, photo?: string) {
+    const query = `INSERT INTO Visa (visa_type, candidate, bio_page, photo, reason, status) VALUES (?, ?, ?, ?, ?, ?)`;
+    const params = [visa_type, candidate, bio_page, photo, reason, "PENDING"];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add visa: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
+
+export async function setVisaFlightNumber(visa_id: number, flight_number: string) {
+    const query = `UPDATE Visa SET flight_number = ? WHERE id = ?`;
+    const params = [flight_number, visa_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set visa flight number: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.affectedRows as number;
+}
+
+export async function setVisaController(visa_id: number, controller_id: number) {
+    const query = `UPDATE Visa SET controller = ? WHERE id = ?`;
+    const params = [controller_id, visa_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set visa controller: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.affectedRows as number;
+}
+
+export async function setVisaFingerprint(visa_id: number, fingerprint: string) {
+    const query = `UPDATE Visa SET fingerprint = ? WHERE id = ?`;
+    const params = [fingerprint, visa_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set visa fingerprint: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.affectedRows as number;
+}
+
+export async function setVisaStatus(visa_id: number, status: string, granted_date?: string, remarks?: string) {
+    const query = `UPDATE Visa SET status = ?, granted_date = ?, remarks = ? WHERE id = ?`;
+    const params = [status, granted_date, remarks, visa_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set visa status: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.affectedRows as number;
+}
+
+export async function addInterview(visa_id: number, interviewer_id: number, status: string, remarks?: string) {
+    const query = `INSERT INTO Interview (visa, interviewer, status, remarks) VALUES (?, ?, ?, ?)`;
+    const params = [visa_id, interviewer_id, status, remarks];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to add interview: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.insertId as number;
+}
