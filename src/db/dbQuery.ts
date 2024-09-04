@@ -256,9 +256,9 @@ export async function setVisaStatus(visa_id: number, status: string, granted_dat
     return res.affectedRows as number;
 }
 
-export async function addInterview(visa_id: number, interviewer_id: number, status: string, remarks?: string) {
-    const query = `INSERT INTO Interview (visa, interviewer, status, remarks) VALUES (?, ?, ?, ?)`;
-    const params = [visa_id, interviewer_id, status, remarks];
+export async function scheduleInterview(visa_id: number, timestamp: number) {
+    const query = `INSERT INTO Interview (visa, interview_time, status) VALUES (?, ?, ?)`;
+    const params = [visa_id, timestamp, "SCHEDULED"];
 
     const conn = await getConnection();
 
@@ -272,3 +272,21 @@ export async function addInterview(visa_id: number, interviewer_id: number, stat
     const [res, _] = result as any;
     return res.insertId as number;
 }
+
+export async function setInterviewStatus(interview_id: number, interviewer: string, status: string, remarks: string) {
+    const query = `UPDATE Interview SET interviewer = ?, status = ?, remarks = ? WHERE id = ?`;
+    const params = [interviewer, status, remarks, interview_id];
+
+    const conn = await getConnection();
+
+    const [result, error] = await awaitable(conn.execute(query, params));
+
+    if (error) {
+        getLogger('error').error(`Failed to set interview status: ${error}`);
+        result -1;
+    }
+
+    const [res, _] = result as any;
+    return res.affectedRows as number;
+}
+
