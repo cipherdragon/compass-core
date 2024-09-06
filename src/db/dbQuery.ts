@@ -283,10 +283,107 @@ export async function setInterviewStatus(interview_id: number, interviewer: stri
 
     if (error) {
         getLogger('error').error(`Failed to set interview status: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
     return res.affectedRows as number;
 }
+
+
+export async function getVisaTypes() {
+    // call getEligiblePersons and make a list
+    // call getActivityEligibility and make a list
+
+    /*
+    return VisaType[] where VisaType = {
+        id: number,
+        type: string,
+        description: string,
+        fee: number,
+        max_validity_period: number,
+        eligible_persons: PersonType[],
+        activity_eligibility: Activity[]
+    }
+
+    where PersonType = {
+        id: number,
+        type: string
+    }
+
+    where Activity = {
+        id: number,
+        activity: string,
+        eligibility: boolean
+    }
+    */
+
+    const query = `
+        SELECT 
+            VisaType.id AS VisaTypeId, 
+            VisaType.type AS VisaType,
+            PersonType.type AS AllowedPerson,
+            Activity.activity AS AllowedActivity,
+            ActivityEligibility.eligibility AS Eligibility
+        FROM 
+            VisaType 
+        LEFT JOIN 
+            EligiblePerson ON VisaType.id = EligiblePerson.visa_type 
+        LEFT JOIN 
+            PersonType ON EligiblePerson.person = PersonType.id
+        LEFT JOIN 
+            ActivityEligibility ON VisaType.id = ActivityEligibility.visa_type 
+        LEFT JOIN 
+            Activity ON ActivityEligibility.activity = Activity.id;
+    `;
+
+    const conn = await getConnection();
+
+
+    const [queryResult, error] = await awaitable(conn.execute(query));
+
+    if (error) {
+        getLogger('error').error(`Failed to set interview status: ${error}`);
+        throw new Error(`Failed to get visa types: ${error}`);
+    }
+
+    const [results, _] = queryResult as any;
+
+    const visaTypes = results.reduce((acc: any, curr: any) => {
+        const { VisaTypeId, VisaType, AllowedPerson, AllowedActivity: Activity, Eligibility } = curr;
+
+        if (!acc[VisaTypeId]) {
+            acc[VisaTypeId] = {
+                id: VisaTypeId,
+                type: VisaType,
+                eligible_persons: [],
+                allowed_activities: [],
+                non_allowed_activities: []
+            };
+        }
+
+        if (AllowedPerson) {
+            acc[VisaTypeId].eligible_persons.push(AllowedPerson);
+        }
+
+        if (Activity) {
+            if (Eligibility) {
+                acc[VisaTypeId].allowed_activities.push(Activity);
+            } else {
+                acc[VisaTypeId].non_allowed_activities.push(Activity);
+            }
+        }
+
+        return acc;
+    }, {}); 
+
+    Object.keys(visaTypes).forEach((key: any) => {
+        visaTypes[key].eligible_persons = visaTypes[key].eligible_persons.filter((v: any, i: any, a: any) => a.indexOf(v) === i);
+        visaTypes[key].allowed_activities = visaTypes[key].allowed_activities.filter((v: any, i: any, a: any) => a.indexOf(v) === i);
+        visaTypes[key].non_allowed_activities = visaTypes[key].non_allowed_activities.filter((v: any, i: any, a: any) => a.indexOf(v) === i);
+    })
+
+    return visaTypes;
+}
+
 
