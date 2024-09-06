@@ -28,7 +28,7 @@ export async function addActivity(activity: string) {
 
     if (error) {
         getLogger('error').error(`Failed to add activity: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -45,7 +45,7 @@ export async function addPassport(passport_num: string, issue_date: string, expi
 
     if (error) {
         getLogger('error').error(`Failed to add passport: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -62,7 +62,7 @@ export async function addPersonType(person_type: string) {
 
     if (error) {
         getLogger('error').error(`Failed to add person type: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -79,7 +79,7 @@ export async function addVisaType(type: string, desc: string, fee: number, valid
 
     if (error) {
         getLogger('error').error(`Failed to add visa type: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -96,7 +96,7 @@ export async function setPersonEligibility(person_id: number, visa_id: number) {
 
     if (error) {
         getLogger('error').error(`Failed to set person eligibility: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -113,7 +113,7 @@ export async function setActivityEligibility(visa_id: number, activity_id: numbe
 
     if (error) {
         getLogger('error').error(`Failed to set activity eligibility: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -130,7 +130,7 @@ export async function addController(first_name: string, last_name: string, email
 
     if (error) {
         getLogger('error').error(`Failed to add controller: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -147,7 +147,7 @@ export async function addCandidate(email: string, gender: string, birthday: stri
 
     if (error) {
         getLogger('error').error(`Failed to add candidate: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -164,7 +164,7 @@ export async function addTravelHistory(candidate_id: number, country: string, st
 
     if (error) {
         getLogger('error').error(`Failed to add travel history: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -181,7 +181,7 @@ export async function addVisaApplication(visa_type: number, candidate: number, r
 
     if (error) {
         getLogger('error').error(`Failed to add visa: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -198,7 +198,7 @@ export async function setVisaFlightNumber(visa_id: number, flight_number: string
 
     if (error) {
         getLogger('error').error(`Failed to set visa flight number: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -215,7 +215,7 @@ export async function setVisaController(visa_id: number, controller_id: number) 
 
     if (error) {
         getLogger('error').error(`Failed to set visa controller: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -232,7 +232,7 @@ export async function setVisaFingerprint(visa_id: number, fingerprint: string) {
 
     if (error) {
         getLogger('error').error(`Failed to set visa fingerprint: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -249,7 +249,7 @@ export async function setVisaStatus(visa_id: number, status: string, granted_dat
 
     if (error) {
         getLogger('error').error(`Failed to set visa status: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
@@ -266,7 +266,7 @@ export async function scheduleInterview(visa_id: number, timestamp: number) {
 
     if (error) {
         getLogger('error').error(`Failed to add interview: ${error}`);
-        result -1;
+        return -1;
     }
 
     const [res, _] = result as any;
